@@ -1,34 +1,59 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { questions } from '../data/questions.js';
 import leaderboardArtwork from '../images/fp5.png';
 import {
+  calculateScore,
   getCurrentParticipant,
+  getParticipantQuestions,
   getSortedLeaderboard,
 } from '../utils/storage.js';
 
 const LEADERBOARD_DISPLAY_LIMIT = 10;
 
+function getInstantLeaderboardEntry(participant) {
+  if (!participant) return null;
+  if (participant.leaderboardEntry) return participant.leaderboardEntry;
+
+  const participantQuestions = getParticipantQuestions(participant, questions);
+  const score = calculateScore(participant.answers, participantQuestions);
+
+  return {
+    entryId: participant.leaderboardEntryId || `local-${participant.id}`,
+    name: participant.fullName,
+    email: participant.email,
+    score,
+    total: participantQuestions.length,
+    percentage: Math.round((score / participantQuestions.length) * 100),
+    completedAt: participant.completedAt || new Date().toISOString(),
+  };
+}
+
 export default function LeaderboardPage() {
   const navigate = useNavigate();
-  const [entries, setEntries] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
   const currentParticipant = getCurrentParticipant();
   const latestEntryId = currentParticipant?.leaderboardEntryId;
+  const instantEntry = getInstantLeaderboardEntry(currentParticipant);
+  const [entries, setEntries] = useState(() => (instantEntry ? [instantEntry] : []));
+  const [isLoading, setIsLoading] = useState(() => !instantEntry);
+  const [error, setError] = useState('');
   const visibleEntries = entries.slice(0, LEADERBOARD_DISPLAY_LIMIT);
 
   const loadLeaderboard = useCallback(async () => {
-    setIsLoading(true);
+    if (entries.length === 0) {
+      setIsLoading(true);
+    }
     setError('');
 
     try {
-      setEntries(await getSortedLeaderboard());
+      const savedEntries = await getSortedLeaderboard();
+      setEntries((current) => (savedEntries.length > 0 ? savedEntries : current));
     } catch (loadError) {
       setError(loadError.message);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [entries.length]);
 
   useEffect(() => {
     loadLeaderboard();
@@ -36,12 +61,20 @@ export default function LeaderboardPage() {
 
   return (
     <section className="leaderboard-page" aria-label="Top of the man leaderboard">
-      <img className="leaderboard-artwork" src={leaderboardArtwork} alt="" aria-hidden="true" />
+      <img
+        className="leaderboard-artwork"
+        src={leaderboardArtwork}
+        alt=""
+        aria-hidden="true"
+        decoding="async"
+        fetchPriority="high"
+        loading="eager"
+      />
 
       <div className="leaderboard-board">
         <h1>TOP OF THE MAN</h1>
 
-        {isLoading ? (
+        {isLoading && entries.length === 0 ? (
           <div className="leaderboard-state">
             <h3>Loading results</h3>
             <p>Fetching participant scores from the host laptop.</p>

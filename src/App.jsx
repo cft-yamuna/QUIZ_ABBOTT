@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import AppShell from './components/AppShell.jsx';
+import FullscreenToggle from './components/FullscreenToggle.jsx';
 import StartPage from './pages/StartPage.jsx';
 import RegistrationPage from './pages/RegistrationPage.jsx';
 import QuizPage from './pages/QuizPage.jsx';
@@ -30,12 +31,16 @@ const PRELOAD_IMAGES = [
 ];
 
 function preloadImages() {
+  if (typeof document === 'undefined') return;
+
   PRELOAD_IMAGES.forEach((src) => {
-    const link = document.createElement('link');
-    link.as = 'image';
-    link.href = src;
-    link.rel = 'preload';
-    document.head.appendChild(link);
+    if (!document.querySelector(`link[rel="preload"][href="${src}"]`)) {
+      const link = document.createElement('link');
+      link.as = 'image';
+      link.href = src;
+      link.rel = 'preload';
+      document.head.appendChild(link);
+    }
 
     const image = new Image();
     image.decoding = 'async';
@@ -57,6 +62,7 @@ export default function App() {
         <Route path="/leaderboard" element={<LeaderboardPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <FullscreenToggle />
     </AppShell>
   );
 }

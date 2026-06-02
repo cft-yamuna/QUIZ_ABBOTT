@@ -43,11 +43,19 @@ export default function RegistrationPage() {
 
   return (
     <section className="register-page" aria-label="Participant registration">
-      <img className="register-artwork" src={registerArtwork} alt="" aria-hidden="true" />
+      <img
+        className="register-artwork"
+        src={registerArtwork}
+        alt=""
+        aria-hidden="true"
+        decoding="async"
+        fetchPriority="high"
+        loading="eager"
+      />
       <form className="register-form" onSubmit={handleSubmit} noValidate>
         <label className={`image-field ${form.fullName ? 'has-value' : ''}`}>
           <span className="sr-only">Full Name</span>
-          <img src={nameField} alt="" aria-hidden="true" />
+          <img src={nameField} alt="" aria-hidden="true" decoding="async" loading="eager" />
           <input
             aria-invalid={Boolean(errors.fullName)}
             autoComplete="name"
@@ -62,7 +70,7 @@ export default function RegistrationPage() {
 
         <label className={`image-field ${form.email ? 'has-value' : ''}`}>
           <span className="sr-only">Email Address</span>
-          <img src={emailField} alt="" aria-hidden="true" />
+          <img src={emailField} alt="" aria-hidden="true" decoding="async" loading="eager" />
           <input
             aria-invalid={Boolean(errors.email)}
             autoComplete="email"
@@ -76,7 +84,7 @@ export default function RegistrationPage() {
         </label>
 
         <button className="submit-image-button" type="submit">
-          <img src={submitButton} alt="Submit" />
+          <img src={submitButton} alt="Submit" decoding="async" loading="eager" />
         </button>
       </form>
     </section>

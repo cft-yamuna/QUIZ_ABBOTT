@@ -5,7 +5,7 @@ import { useCurrentParticipant } from '../hooks/useCurrentParticipant.js';
 import { getParticipantQuestions, updateParticipantAnswer } from '../utils/storage.js';
 import quizArtwork from '../images/fp3.png';
 
-const ANSWER_FEEDBACK_DELAY_MS = 600;
+const ANSWER_FEEDBACK_DELAY_MS = 1000;
 
 export default function QuizPage() {
   const navigate = useNavigate();
@@ -71,6 +71,11 @@ export default function QuizPage() {
     refreshParticipant();
     setFeedbackOptionId(optionId);
 
+    if (ANSWER_FEEDBACK_DELAY_MS <= 0) {
+      goNext();
+      return;
+    }
+
     feedbackTimeoutRef.current = window.setTimeout(() => {
       goNext();
     }, ANSWER_FEEDBACK_DELAY_MS);
@@ -96,7 +101,15 @@ export default function QuizPage() {
 
   return (
     <section className="quiz-page" aria-label={`Question ${currentIndex + 1} of ${totalQuestions}`}>
-      <img className="quiz-artwork" src={quizArtwork} alt="" aria-hidden="true" />
+      <img
+        className="quiz-artwork"
+        src={quizArtwork}
+        alt=""
+        aria-hidden="true"
+        decoding="async"
+        fetchPriority="high"
+        loading="eager"
+      />
 
       <div className="quiz-ui">
         <div className="quiz-status-row">

@@ -20,8 +20,19 @@ function createParticipantId() {
   return `USER${String(Date.now()).slice(-6)}${Math.random().toString(16).slice(2, 4).toUpperCase()}`;
 }
 
+function shuffleItems(items) {
+  const shuffled = [...items];
+
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
+  }
+
+  return shuffled;
+}
+
 function createQuestionOrder() {
-  return questions.map((question) => question.id).slice(0, QUIZ_QUESTION_COUNT);
+  return shuffleItems(questions.map((question) => question.id)).slice(0, QUIZ_QUESTION_COUNT);
 }
 
 async function requestJSON(path, options = {}) {

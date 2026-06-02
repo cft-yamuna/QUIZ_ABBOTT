@@ -7,9 +7,17 @@ export default function StartPage() {
 
   return (
     <section className="start-page" aria-label="Welcome to the quiz game">
-      <img className="start-artwork" src={welcomeArtwork} alt="" aria-hidden="true" />
+      <img
+        className="start-artwork"
+        src={welcomeArtwork}
+        alt=""
+        aria-hidden="true"
+        decoding="async"
+        fetchPriority="high"
+        loading="eager"
+      />
       <button className="start-image-button" onClick={() => navigate('/register')} type="button">
-        <img src={startButton} alt="Start" />
+        <img src={startButton} alt="Start" decoding="async" loading="eager" />
       </button>
     </section>
   );

@@ -41,14 +41,12 @@ export default function ScorePage() {
   }, []);
 
   useEffect(() => {
-    if (!result) return undefined;
-
     const redirectTimerId = window.setTimeout(() => {
       navigate('/leaderboard');
     }, 5000);
 
     return () => window.clearTimeout(redirectTimerId);
-  }, [navigate, result]);
+  }, [navigate]);
 
   if (!participant) {
     return <Navigate to="/register" replace />;
@@ -66,6 +64,9 @@ export default function ScorePage() {
         src={resultArtwork}
         alt=""
         aria-hidden="true"
+        decoding="async"
+        fetchPriority="high"
+        loading="eager"
       />
 
       <div className="result-frame">
@@ -74,6 +75,9 @@ export default function ScorePage() {
           src={congratsFrame}
           alt=""
           aria-hidden="true"
+          decoding="async"
+          fetchPriority="high"
+          loading="eager"
         />
 
         <div className="result-copy" aria-label={`You have scored ${score} out of ${participantQuestions.length}`}>
@@ -85,7 +89,6 @@ export default function ScorePage() {
 
         <button
           className="result-primary-action"
-          disabled={!result}
           onClick={() => navigate('/leaderboard')}
           aria-label="Continue to leaderboard"
           type="button"
