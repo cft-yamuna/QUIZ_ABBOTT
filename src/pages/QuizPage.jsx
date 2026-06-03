@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { questions, quizConfig } from '../data/questions.js';
 import { useCurrentParticipant } from '../hooks/useCurrentParticipant.js';
-import { getParticipantQuestions, updateParticipantAnswer } from '../utils/storage.js';
+import { getParticipantOptions, getParticipantQuestions, updateParticipantAnswer } from '../utils/storage.js';
 import quizArtwork from '../images/fp3.png';
 
 const ANSWER_FEEDBACK_DELAY_MS = 1000;
@@ -18,6 +18,9 @@ export default function QuizPage() {
   const quizQuestions = useMemo(() => getParticipantQuestions(participant, questions), [participant]);
   const question = quizQuestions[currentIndex];
   const totalQuestions = quizQuestions.length;
+  const questionOptions = useMemo(() => {
+    return getParticipantOptions(participant, question);
+  }, [participant, question]);
 
   const correctOptionIds = useMemo(() => {
     return question?.correctOptionIds || [question?.correctOptionId].filter(Boolean);
@@ -27,7 +30,7 @@ export default function QuizPage() {
     return Array.isArray(answer) ? answer : answer ? [answer] : [];
   }, [participant, question]);
   const isMultiAnswerQuestion = correctOptionIds.length > 1;
-  const hasImageOptions = question?.options.some((option) => option.image);
+  const hasImageOptions = questionOptions.some((option) => option.image);
 
   const goNext = useCallback(() => {
     if (currentIndex === totalQuestions - 1) {
@@ -112,7 +115,7 @@ export default function QuizPage() {
 
   function getOptionClassName(optionId) {
     const classNames = ['option-card'];
-    const option = question.options.find((item) => item.id === optionId);
+    const option = questionOptions.find((item) => item.id === optionId);
 
     if (option?.image) {
       classNames.push('image-option');
@@ -185,7 +188,7 @@ export default function QuizPage() {
         </div>
 
         <div className={`options-grid quiz-options ${hasImageOptions ? 'image-options-grid' : ''}`}>
-          {question.options.map((option) => (
+          {questionOptions.map((option, optionIndex) => (
             <button
               className={getOptionClassName(option.id)}
               disabled={feedbackOptionIds.length > 0}
@@ -193,7 +196,7 @@ export default function QuizPage() {
               onClick={() => selectOption(option.id)}
               type="button"
             >
-              <span>{option.id.toUpperCase()}</span>
+              <span>{String.fromCharCode(65 + optionIndex)}</span>
               {option.image ? (
                 <img src={option.image} alt={option.text} decoding="async" />
               ) : (

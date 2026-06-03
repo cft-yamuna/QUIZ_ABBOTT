@@ -614,7 +614,7 @@ a {
   color: #ffffff;
 }
 
-.quiz-page .option-card.image-option.selected {
+.quiz-page .option-card.image-option.selected:not(.feedback-correct):not(.feedback-incorrect) {
   background: #fff4d7;
   color: #0010ff;
 }

@@ -37,7 +37,16 @@ function shuffleItems(items) {
 }
 
 function createQuestionOrder() {
-  return shuffleItems(questions.map((question) => question.id)).slice(0, QUIZ_QUESTION_COUNT);
+  return shuffleItems(questions.map((question) => question.id));
+}
+
+function createOptionOrders() {
+  return Object.fromEntries(
+    questions.map((question) => [
+      question.id,
+      shuffleItems(question.options.map((option) => option.id)),
+    ]),
+  );
 }
 
 async function requestJSON(path, options = {}) {
@@ -150,6 +159,7 @@ export function createParticipant({ fullName, email }) {
     fullName: fullName.trim(),
     email: email.trim(),
     questionOrder: createQuestionOrder(),
+    optionOrders: createOptionOrders(),
     answers: {},
     startedAt: new Date().toISOString(),
     completedAt: null,
@@ -206,6 +216,20 @@ export function getParticipantQuestions(participant, quizQuestions = questions) 
   }
 
   return quizQuestions.slice(0, QUIZ_QUESTION_COUNT);
+}
+
+export function getParticipantOptions(participant, question) {
+  const orderedIds = Array.isArray(participant?.optionOrders?.[question?.id])
+    ? participant.optionOrders[question.id]
+    : [];
+  const optionsById = new Map((question?.options || []).map((option) => [option.id, option]));
+  const orderedOptions = orderedIds.map((optionId) => optionsById.get(optionId)).filter(Boolean);
+
+  if (orderedOptions.length === question?.options.length) {
+    return orderedOptions;
+  }
+
+  return question?.options || [];
 }
 
 export async function finalizeCurrentParticipant(quizQuestions = questions) {
