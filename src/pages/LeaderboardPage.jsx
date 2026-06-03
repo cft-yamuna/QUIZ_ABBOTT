@@ -77,7 +77,7 @@ export default function LeaderboardPage() {
         {isLoading && entries.length === 0 ? (
           <div className="leaderboard-state">
             <h3>Loading results</h3>
-            <p>Fetching participant scores from the host laptop.</p>
+            <p>Fetching participant scores.</p>
           </div>
         ) : error ? (
           <div className="leaderboard-state">

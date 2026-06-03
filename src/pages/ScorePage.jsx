@@ -54,8 +54,13 @@ export default function ScorePage() {
 
   const participantQuestions = getParticipantQuestions(participant, questions);
   const score = result?.score ?? calculateScore(participant.answers, participantQuestions);
-  const nameLength = participant.fullName.length;
-  const nameSizeClass = nameLength > 24 ? 'very-long-name' : nameLength > 12 ? 'long-name' : '';
+  const normalizedName = participant.fullName.trim();
+  const nameLength = normalizedName.length;
+  const hasMultipleNameParts = /\s/.test(normalizedName);
+  const nameSizeClass = [
+    hasMultipleNameParts ? 'multi-line-name' : '',
+    nameLength > 24 ? 'very-long-name' : nameLength > 12 ? 'long-name' : '',
+  ].filter(Boolean).join(' ');
 
   return (
     <section className="result-page" aria-label={`Congratulations ${participant.fullName}`}>

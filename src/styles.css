@@ -580,40 +580,49 @@ a {
 }
 
 .result-copy {
-  display: block;
+  display: grid;
+  gap: 1.4cqw;
   left: 8%;
   position: absolute;
   right: 8%;
   text-align: center;
-  top: 43.15%;
+  top: 36.7%;
 }
 
 .result-copy h1 {
-  color: #2e4aed;
-  font-family: "Wallace Serif", Georgia, "Times New Roman", serif;
-  font-size: clamp(2.6rem, 13cqw, 9.75rem);
-  font-weight: 700;
   align-items: center;
+  color: #2e4aed;
   display: flex;
-  height: 12.85cqw;
+  font-family: "Wallace Serif", Georgia, "Times New Roman", serif;
+  font-size: clamp(2.15rem, 10.2cqw, 7.65rem);
+  font-weight: 700;
   justify-content: center;
   letter-spacing: 0;
-  line-height: 0.92;
-  margin: 0 auto 1.75cqw;
+  line-height: 0.94;
+  margin: 0 auto;
+  min-height: 12.85cqw;
   max-width: 100%;
   overflow-wrap: anywhere;
   overflow: visible;
   text-wrap: balance;
 }
 
+.result-copy h1.multi-line-name {
+  font-size: clamp(1.95rem, 8.35cqw, 6.26rem);
+  line-height: 0.96;
+  min-height: 18.25cqw;
+}
+
 .result-copy h1.long-name {
   font-size: clamp(1.45rem, 6.1cqw, 4.58rem);
-  line-height: 0.98;
+  line-height: 1;
+  min-height: 15.25cqw;
 }
 
 .result-copy h1.very-long-name {
   font-size: clamp(1rem, 4.4cqw, 3.3rem);
   line-height: 1.02;
+  min-height: 12.85cqw;
 }
 
 .result-copy p {
