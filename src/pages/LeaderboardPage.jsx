@@ -60,7 +60,7 @@ export default function LeaderboardPage() {
   }, [loadLeaderboard]);
 
   return (
-    <section className="leaderboard-page" aria-label="Top of the man leaderboard">
+    <section className="leaderboard-page" aria-label="Leaderboard">
       <img
         className="leaderboard-artwork"
         src={leaderboardArtwork}
@@ -72,7 +72,7 @@ export default function LeaderboardPage() {
       />
 
       <div className="leaderboard-board">
-        <h1>TOP OF THE MAN</h1>
+        <h1>Leaderboard</h1>
 
         {isLoading && entries.length === 0 ? (
           <div className="leaderboard-state">

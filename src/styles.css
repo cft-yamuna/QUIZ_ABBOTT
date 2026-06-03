@@ -1,3 +1,51 @@
+@font-face {
+  font-display: swap;
+  font-family: "Wallace Serif";
+  font-style: normal;
+  font-weight: 300;
+  src: url("./font/WallaceSerif/webfonts/woff2/WallaceSerif-Light.woff2") format("woff2");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "Wallace Serif";
+  font-style: normal;
+  font-weight: 400 500;
+  src: url("./font/WallaceSerif/webfonts/woff2/WallaceSerif-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "Wallace Serif";
+  font-style: normal;
+  font-weight: 600 900;
+  src: url("./font/WallaceSerif/webfonts/woff2/WallaceSerif-Bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "Wallace Sans";
+  font-style: normal;
+  font-weight: 300;
+  src: url("./font/WallaceSans/webfonts/woff2/WallaceSans-Light.woff2") format("woff2");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "Wallace Sans";
+  font-style: normal;
+  font-weight: 400 500;
+  src: url("./font/WallaceSans/webfonts/woff2/WallaceSans-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "Wallace Sans";
+  font-style: normal;
+  font-weight: 600 900;
+  src: url("./font/WallaceSans/webfonts/woff2/WallaceSans-Bold.woff2") format("woff2");
+}
+
 :root {
   color: #fffbf4;
   font-family:
@@ -194,7 +242,7 @@ a {
   background: transparent;
   border: 0;
   border-radius: 8px;
-  bottom: 27.4%;
+  bottom: 30.2%;
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
   display: block;
   left: 50%;
@@ -374,13 +422,16 @@ a {
 }
 
 .question-panel {
-  border: 0.32cqw solid rgba(255, 255, 255, 0.9);
-  border-radius: 1.25cqw;
+  aspect-ratio: 982 / 399;
+  background: url("./images/qd.png") center / contain no-repeat;
   left: 8.2%;
-  min-height: 13.2%;
   position: absolute;
-  top: 37.1%;
-  width: 83.8%;
+  top: 37%;
+  width: 81.8333%;
+}
+
+.question-panel .question-icon {
+  display: none;
 }
 
 .question-icon {
@@ -398,19 +449,18 @@ a {
 .question-index {
   font-size: clamp(0.95rem, 2.85cqw, 2.15rem);
   font-weight: 700;
-  left: 2.1%;
+  left: 2.35%;
   line-height: 1;
   margin: 0;
   position: absolute;
-  top: 12%;
+  top: 29.8%;
 }
 
 .question-copy-wrap {
   align-items: center;
   display: grid;
-  grid-template-columns: 13% minmax(0, 1fr) 13%;
-  min-height: 13.2cqw;
-  padding: 3cqw 2.6cqw 2.5cqw;
+  inset: 27% 15% 12% 15%;
+  position: absolute;
 }
 
 .question-copy-wrap h1 {
@@ -421,38 +471,6 @@ a {
   line-height: 1.12;
   margin: 0;
   text-align: center;
-}
-
-.question-sparks {
-  display: grid;
-  gap: 1.9cqw;
-  justify-items: center;
-}
-
-.question-sparks i {
-  border-bottom: 0.6cqw solid transparent;
-  border-top: 0.6cqw solid transparent;
-  display: block;
-  height: 0;
-  width: 0;
-}
-
-.question-sparks.left i {
-  border-right: 2.2cqw solid rgba(255, 255, 255, 0.88);
-}
-
-.question-sparks.right i {
-  border-left: 2.2cqw solid rgba(255, 255, 255, 0.88);
-}
-
-.question-sparks.left i:first-child,
-.question-sparks.right i:first-child {
-  transform: rotate(45deg);
-}
-
-.question-sparks.left i:last-child,
-.question-sparks.right i:last-child {
-  transform: rotate(-45deg);
 }
 
 .quiz-options {
@@ -581,26 +599,22 @@ a {
 
 .result-copy {
   display: grid;
-  gap: 1.4cqw;
+  gap: 4.1667cqw;
   left: 8%;
   position: absolute;
   right: 8%;
   text-align: center;
-  top: 36.7%;
+  top: 43.4%;
 }
 
 .result-copy h1 {
-  align-items: center;
   color: #2e4aed;
-  display: flex;
   font-family: "Wallace Serif", Georgia, "Times New Roman", serif;
   font-size: clamp(2.15rem, 10.2cqw, 7.65rem);
   font-weight: 700;
-  justify-content: center;
   letter-spacing: 0;
   line-height: 0.94;
   margin: 0 auto;
-  min-height: 12.85cqw;
   max-width: 100%;
   overflow-wrap: anywhere;
   overflow: visible;
@@ -610,26 +624,23 @@ a {
 .result-copy h1.multi-line-name {
   font-size: clamp(1.95rem, 8.35cqw, 6.26rem);
   line-height: 0.96;
-  min-height: 18.25cqw;
 }
 
 .result-copy h1.long-name {
   font-size: clamp(1.45rem, 6.1cqw, 4.58rem);
   line-height: 1;
-  min-height: 15.25cqw;
 }
 
 .result-copy h1.very-long-name {
   font-size: clamp(1rem, 4.4cqw, 3.3rem);
   line-height: 1.02;
-  min-height: 12.85cqw;
 }
 
 .result-copy p {
   color: #000075;
   font-family: "Wallace Sans", Inter, ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(1rem, 4.65cqw, 3.5rem);
-  font-weight: 600;
+  font-size: clamp(0.95rem, 4.3cqw, 3.23rem);
+  font-weight: 400;
   letter-spacing: 0;
   line-height: 1;
   margin: 0;
@@ -703,14 +714,14 @@ a {
   color: #000075;
   font-family: "Wallace Serif", Georgia, "Times New Roman", serif;
   font-size: clamp(1.45rem, 5.55cqw, 4.16rem);
-  font-weight: 700;
+  font-weight: 500;
   height: 6.5833cqw;
   letter-spacing: 0;
   line-height: 6.5833cqw;
   margin: 0 0 4.25cqw;
-  text-align: left;
+  text-align: center;
   white-space: nowrap;
-  width: 52.6667cqw;
+  width: 100%;
 }
 
 .leaderboard-table {
@@ -844,29 +855,31 @@ a {
 
 .fullscreen-toggle {
   align-items: center;
-  background: rgba(255, 255, 255, 0.16);
-  border: 1px solid rgba(0, 2, 112, 0.2);
-  border-radius: 8px;
-  bottom: max(12px, env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 999px;
+  bottom: max(8px, env(safe-area-inset-bottom));
   display: inline-flex;
-  height: 34px;
+  height: 24px;
   justify-content: center;
-  opacity: 0.34;
+  opacity: 0.42;
   padding: 0;
   position: fixed;
-  right: max(12px, env(safe-area-inset-right));
+  right: max(8px, env(safe-area-inset-right));
   transition:
     background 150ms ease,
+    border-color 150ms ease,
     opacity 150ms ease,
     transform 150ms ease;
-  width: 34px;
+  width: 24px;
   z-index: 50;
 }
 
 .fullscreen-toggle:hover,
 .fullscreen-toggle:focus-visible {
-  background: rgba(255, 255, 255, 0.5);
-  opacity: 0.86;
+  background: rgba(255, 255, 255, 0.34);
+  border-color: rgba(255, 255, 255, 0.72);
+  opacity: 0.78;
   transform: translateY(-1px);
 }
 
@@ -876,13 +889,13 @@ a {
 }
 
 .fullscreen-toggle span {
-  border: 2px solid #000075;
+  border: 1.5px solid rgba(0, 0, 117, 0.72);
   border-radius: 2px;
   display: block;
-  height: 13px;
-  opacity: 0.9;
+  height: 9px;
+  opacity: 0.86;
   position: relative;
-  width: 13px;
+  width: 9px;
 }
 
 .fullscreen-toggle span::before,
@@ -894,34 +907,34 @@ a {
 }
 
 .fullscreen-toggle span::before {
-  height: 2px;
-  left: 3px;
-  top: 4px;
-  width: 13px;
+  height: 1.5px;
+  left: 2px;
+  top: 3px;
+  width: 9px;
 }
 
 .fullscreen-toggle span::after {
-  height: 13px;
-  left: 4px;
-  top: 3px;
-  width: 2px;
+  height: 9px;
+  left: 3px;
+  top: 2px;
+  width: 1.5px;
 }
 
 .fullscreen-toggle.is-active span {
-  height: 12px;
-  width: 12px;
+  height: 9px;
+  width: 9px;
 }
 
 .fullscreen-toggle.is-active span::before {
-  left: -4px;
-  top: 4px;
-  width: 12px;
+  left: -3px;
+  top: 3px;
+  width: 9px;
 }
 
 .fullscreen-toggle.is-active span::after {
-  height: 12px;
-  left: 4px;
-  top: -4px;
+  height: 9px;
+  left: 3px;
+  top: -3px;
 }
 
 .screen-center,

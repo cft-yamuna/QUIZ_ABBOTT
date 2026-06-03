@@ -140,17 +140,7 @@ export default function QuizPage() {
           <div className="question-icon" aria-hidden="true">?</div>
           <p className="question-index">Q{currentIndex + 1}</p>
           <div className="question-copy-wrap">
-            <span className="question-sparks left" aria-hidden="true">
-              <i />
-              <i />
-              <i />
-            </span>
             <h1>{question.text}</h1>
-            <span className="question-sparks right" aria-hidden="true">
-              <i />
-              <i />
-              <i />
-            </span>
           </div>
         </div>
 
