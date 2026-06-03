@@ -426,8 +426,8 @@ a {
   background: url("./images/qd.png") center / contain no-repeat;
   left: 8.2%;
   position: absolute;
-  top: 37%;
-  width: 81.8333%;
+  top: 32.5%;
+  width: 83.8%;
 }
 
 .question-panel .question-icon {
@@ -459,7 +459,7 @@ a {
 .question-copy-wrap {
   align-items: center;
   display: grid;
-  inset: 27% 15% 12% 15%;
+  inset: 33% 15% 10% 15%;
   position: absolute;
 }
 
@@ -473,14 +473,14 @@ a {
   text-align: center;
 }
 
-.quiz-options {
+.quiz-page .quiz-options {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   left: 8.2%;
   column-gap: 10.4%;
   position: absolute;
-  row-gap: 8.4cqw;
-  top: 60.2%;
+  row-gap: 96px;
+  top: 57%;
   width: 83.8%;
 }
 
@@ -860,7 +860,7 @@ a {
   border-radius: 999px;
   bottom: max(8px, env(safe-area-inset-bottom));
   display: inline-flex;
-  height: 24px;
+  height: 18px;
   justify-content: center;
   opacity: 0.42;
   padding: 0;
@@ -871,7 +871,7 @@ a {
     border-color 150ms ease,
     opacity 150ms ease,
     transform 150ms ease;
-  width: 24px;
+  width: 18px;
   z-index: 50;
 }
 
