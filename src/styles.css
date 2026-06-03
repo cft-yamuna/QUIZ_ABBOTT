@@ -889,21 +889,12 @@ a {
 }
 
 .fullscreen-toggle span {
-  border: 1.5px solid rgba(0, 0, 117, 0.72);
-  border-radius: 2px;
-  display: block;
-  height: 9px;
-  opacity: 0.86;
-  position: relative;
-  width: 9px;
+  display: none;
 }
 
 .fullscreen-toggle span::before,
 .fullscreen-toggle span::after {
-  background: #000075;
-  content: "";
-  display: block;
-  position: absolute;
+  content: none;
 }
 
 .fullscreen-toggle span::before {
