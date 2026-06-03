@@ -177,9 +177,22 @@ export function updateParticipantAnswer(questionId, optionId) {
   return updated;
 }
 
+function getCorrectOptionIds(question) {
+  return question.correctOptionIds || [question.correctOptionId];
+}
+
+function hasAllCorrectOptionIds(answer, correctOptionIds) {
+  const selectedOptionIds = Array.isArray(answer) ? answer : answer ? [answer] : [];
+
+  return (
+    selectedOptionIds.length === correctOptionIds.length
+    && correctOptionIds.every((optionId) => selectedOptionIds.includes(optionId))
+  );
+}
+
 export function calculateScore(answers, quizQuestions = questions) {
   return quizQuestions.reduce((score, question) => {
-    return answers?.[question.id] === question.correctOptionId ? score + 1 : score;
+    return hasAllCorrectOptionIds(answers?.[question.id], getCorrectOptionIds(question)) ? score + 1 : score;
   }, 0);
 }
 

@@ -11,7 +11,7 @@ export default function QuizPage() {
   const navigate = useNavigate();
   const { questionNumber } = useParams();
   const { participant, refreshParticipant } = useCurrentParticipant();
-  const [feedbackOptionId, setFeedbackOptionId] = useState('');
+  const [feedbackOptionIds, setFeedbackOptionIds] = useState([]);
   const [timeLeft, setTimeLeft] = useState(quizConfig.secondsPerQuestion);
   const feedbackTimeoutRef = useRef(null);
   const currentIndex = Number(questionNumber) - 1;
@@ -19,9 +19,15 @@ export default function QuizPage() {
   const question = quizQuestions[currentIndex];
   const totalQuestions = quizQuestions.length;
 
-  const selectedOptionId = useMemo(() => {
-    return participant?.answers?.[question?.id] || '';
+  const correctOptionIds = useMemo(() => {
+    return question?.correctOptionIds || [question?.correctOptionId].filter(Boolean);
+  }, [question]);
+  const selectedOptionIds = useMemo(() => {
+    const answer = participant?.answers?.[question?.id];
+    return Array.isArray(answer) ? answer : answer ? [answer] : [];
   }, [participant, question]);
+  const isMultiAnswerQuestion = correctOptionIds.length > 1;
+  const hasImageOptions = question?.options.some((option) => option.image);
 
   const goNext = useCallback(() => {
     if (currentIndex === totalQuestions - 1) {
@@ -33,7 +39,7 @@ export default function QuizPage() {
   }, [currentIndex, navigate, totalQuestions]);
 
   useEffect(() => {
-    setFeedbackOptionId('');
+    setFeedbackOptionIds([]);
     setTimeLeft(quizConfig.secondsPerQuestion);
 
     return () => {
@@ -42,7 +48,7 @@ export default function QuizPage() {
   }, [questionNumber]);
 
   useEffect(() => {
-    if (!participant || !question || feedbackOptionId) return undefined;
+    if (!participant || !question || feedbackOptionIds.length > 0) return undefined;
 
     if (timeLeft <= 0) {
       goNext();
@@ -54,7 +60,7 @@ export default function QuizPage() {
     }, 1000);
 
     return () => window.clearTimeout(timerId);
-  }, [feedbackOptionId, goNext, participant, question, timeLeft]);
+  }, [feedbackOptionIds.length, goNext, participant, question, timeLeft]);
 
   if (!participant) {
     return <Navigate to="/register" replace />;
@@ -65,11 +71,34 @@ export default function QuizPage() {
   }
 
   function selectOption(optionId) {
-    if (feedbackOptionId) return;
+    if (feedbackOptionIds.length > 0) return;
+
+    if (isMultiAnswerQuestion) {
+      const nextSelectedOptionIds = selectedOptionIds.includes(optionId)
+        ? selectedOptionIds.filter((selectedOptionId) => selectedOptionId !== optionId)
+        : [...selectedOptionIds, optionId].slice(0, correctOptionIds.length);
+
+      updateParticipantAnswer(question.id, nextSelectedOptionIds);
+      refreshParticipant();
+
+      if (nextSelectedOptionIds.length < correctOptionIds.length) return;
+
+      setFeedbackOptionIds(nextSelectedOptionIds);
+
+      if (ANSWER_FEEDBACK_DELAY_MS <= 0) {
+        goNext();
+        return;
+      }
+
+      feedbackTimeoutRef.current = window.setTimeout(() => {
+        goNext();
+      }, ANSWER_FEEDBACK_DELAY_MS);
+      return;
+    }
 
     updateParticipantAnswer(question.id, optionId);
     refreshParticipant();
-    setFeedbackOptionId(optionId);
+    setFeedbackOptionIds([optionId]);
 
     if (ANSWER_FEEDBACK_DELAY_MS <= 0) {
       goNext();
@@ -83,21 +112,32 @@ export default function QuizPage() {
 
   function getOptionClassName(optionId) {
     const classNames = ['option-card'];
+    const option = question.options.find((item) => item.id === optionId);
 
-    if (selectedOptionId === optionId) {
+    if (option?.image) {
+      classNames.push('image-option');
+    }
+
+    if (!option?.image && (option?.text.length || 0) > 34) {
+      classNames.push('long-option');
+    }
+
+    if (selectedOptionIds.includes(optionId)) {
       classNames.push('selected');
     }
 
-    if (feedbackOptionId) {
-      if (optionId === question.correctOptionId) {
+    if (feedbackOptionIds.length > 0) {
+      if (correctOptionIds.includes(optionId)) {
         classNames.push('feedback-correct');
-      } else if (optionId === feedbackOptionId) {
+      } else if (feedbackOptionIds.includes(optionId)) {
         classNames.push('feedback-incorrect');
       }
     }
 
     return classNames.join(' ');
   }
+
+  const questionClassName = question.text.length > 68 ? 'long-question' : '';
 
   return (
     <section className="quiz-page" aria-label={`Question ${currentIndex + 1} of ${totalQuestions}`}>
@@ -140,21 +180,25 @@ export default function QuizPage() {
           <div className="question-icon" aria-hidden="true">?</div>
           <p className="question-index">Q{currentIndex + 1}</p>
           <div className="question-copy-wrap">
-            <h1>{question.text}</h1>
+            <h1 className={questionClassName}>{question.text}</h1>
           </div>
         </div>
 
-        <div className="options-grid quiz-options">
+        <div className={`options-grid quiz-options ${hasImageOptions ? 'image-options-grid' : ''}`}>
           {question.options.map((option) => (
             <button
               className={getOptionClassName(option.id)}
-              disabled={Boolean(feedbackOptionId)}
+              disabled={feedbackOptionIds.length > 0}
               key={option.id}
               onClick={() => selectOption(option.id)}
               type="button"
             >
               <span>{option.id.toUpperCase()}</span>
-              <strong>{option.text}</strong>
+              {option.image ? (
+                <img src={option.image} alt={option.text} decoding="async" />
+              ) : (
+                <strong>{option.text}</strong>
+              )}
             </button>
           ))}
         </div>
