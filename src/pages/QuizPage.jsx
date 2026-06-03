@@ -12,9 +12,15 @@ export default function QuizPage() {
   const { questionNumber } = useParams();
   const { participant, refreshParticipant } = useCurrentParticipant();
   const [feedbackOptionIds, setFeedbackOptionIds] = useState([]);
-  const [timeLeft, setTimeLeft] = useState(quizConfig.secondsPerQuestion);
+  const [timerState, setTimerState] = useState(() => ({
+    questionNumber,
+    seconds: quizConfig.secondsPerQuestion,
+  }));
   const feedbackTimeoutRef = useRef(null);
   const currentIndex = Number(questionNumber) - 1;
+  const timeLeft = timerState.questionNumber === questionNumber
+    ? timerState.seconds
+    : quizConfig.secondsPerQuestion;
   const quizQuestions = useMemo(() => getParticipantQuestions(participant, questions), [participant]);
   const question = quizQuestions[currentIndex];
   const totalQuestions = quizQuestions.length;
@@ -43,7 +49,10 @@ export default function QuizPage() {
 
   useEffect(() => {
     setFeedbackOptionIds([]);
-    setTimeLeft(quizConfig.secondsPerQuestion);
+    setTimerState({
+      questionNumber,
+      seconds: quizConfig.secondsPerQuestion,
+    });
 
     return () => {
       window.clearTimeout(feedbackTimeoutRef.current);
@@ -59,11 +68,18 @@ export default function QuizPage() {
     }
 
     const timerId = window.setTimeout(() => {
-      setTimeLeft((current) => Math.max(0, current - 1));
+      setTimerState((current) => {
+        if (current.questionNumber !== questionNumber) return current;
+
+        return {
+          questionNumber,
+          seconds: Math.max(0, current.seconds - 1),
+        };
+      });
     }, 1000);
 
     return () => window.clearTimeout(timerId);
-  }, [feedbackOptionIds.length, goNext, participant, question, timeLeft]);
+  }, [feedbackOptionIds.length, goNext, participant, question, questionNumber, timeLeft]);
 
   if (!participant) {
     return <Navigate to="/register" replace />;
