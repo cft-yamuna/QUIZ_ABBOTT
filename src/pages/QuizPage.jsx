@@ -17,6 +17,7 @@ export default function QuizPage() {
     seconds: quizConfig.secondsPerQuestion,
   }));
   const feedbackTimeoutRef = useRef(null);
+  const advancedQuestionRef = useRef(null);
   const currentIndex = Number(questionNumber) - 1;
   const timeLeft = timerState.questionNumber === questionNumber
     ? timerState.seconds
@@ -38,16 +39,23 @@ export default function QuizPage() {
   const isMultiAnswerQuestion = correctOptionIds.length > 1;
   const hasImageOptions = questionOptions.some((option) => option.image);
 
-  const goNext = useCallback(() => {
-    if (currentIndex === totalQuestions - 1) {
+  const goNext = useCallback((fromQuestionNumber = questionNumber) => {
+    if (advancedQuestionRef.current === fromQuestionNumber) return;
+
+    advancedQuestionRef.current = fromQuestionNumber;
+
+    const fromIndex = Number(fromQuestionNumber) - 1;
+
+    if (fromIndex === totalQuestions - 1) {
       navigate('/score');
       return;
     }
 
-    navigate(`/quiz/${currentIndex + 2}`);
-  }, [currentIndex, navigate, totalQuestions]);
+    navigate(`/quiz/${fromIndex + 2}`);
+  }, [navigate, questionNumber, totalQuestions]);
 
   useEffect(() => {
+    advancedQuestionRef.current = null;
     setFeedbackOptionIds([]);
     setTimerState({
       questionNumber,
@@ -62,14 +70,18 @@ export default function QuizPage() {
   useEffect(() => {
     if (!participant || !question || feedbackOptionIds.length > 0) return undefined;
 
-    if (timeLeft <= 0) {
-      goNext();
-      return undefined;
-    }
-
     const timerId = window.setTimeout(() => {
       setTimerState((current) => {
         if (current.questionNumber !== questionNumber) return current;
+
+        if (current.seconds <= 1) {
+          goNext(questionNumber);
+
+          return {
+            questionNumber,
+            seconds: 0,
+          };
+        }
 
         return {
           questionNumber,
