@@ -66,7 +66,7 @@ export const questions = [
   },
   {
     id: 'q6',
-    text: 'What is the correct site of application for FreeStyle Libre 2 Plus sensor?',
+    text: 'Correct site of application of a sensor:',
     options: [
       { id: 'a', text: 'Site option A', image: siteA },
       { id: 'b', text: 'Site option B', image: siteB },
@@ -209,5 +209,16 @@ export const questions = [
       { id: 'd', text: '70 - 140 mg/dl' },
     ],
     correctOptionId: 'd',
+  },
+  {
+    id: 'q20',
+    text: 'What is the correct site of application for FreeStyle Libre 2 Plus sensor?',
+    options: [
+      { id: 'a', text: 'Side of the arm' },
+      { id: 'b', text: 'Back side of the upper arm' },
+      { id: 'c', text: 'Stomach' },
+      { id: 'd', text: 'Any site on the body' },
+    ],
+    correctOptionId: 'b',
   },
 ];
