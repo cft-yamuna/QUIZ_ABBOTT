@@ -5,7 +5,7 @@ import siteD from '../images/site-d.png';
 
 export const quizConfig = {
   questionCount: 5,
-  secondsPerQuestion: 10,
+  secondsPerQuestion: 25,
 };
 
 export const questions = [
