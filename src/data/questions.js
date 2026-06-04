@@ -208,7 +208,7 @@ export const questions = [
       { id: 'c', text: '63 - 140 mg/dl' },
       { id: 'd', text: '70 - 140 mg/dl' },
     ],
-    correctOptionId: 'd',
+    correctOptionId: 'c',
   },
   {
     id: 'q20',
