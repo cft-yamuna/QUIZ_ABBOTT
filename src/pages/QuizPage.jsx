@@ -6,12 +6,14 @@ import { getParticipantOptions, getParticipantQuestions, updateParticipantAnswer
 import quizArtwork from '../images/fp3.png';
 
 const ANSWER_FEEDBACK_DELAY_MS = 1000;
+const OPTION_REVEAL_DELAY_MS = 3000;
 
 export default function QuizPage() {
   const navigate = useNavigate();
   const { questionNumber } = useParams();
   const { participant, refreshParticipant } = useCurrentParticipant();
   const [feedbackOptionIds, setFeedbackOptionIds] = useState([]);
+  const [revealedQuestionNumber, setRevealedQuestionNumber] = useState(null);
   const [timerState, setTimerState] = useState(() => ({
     questionNumber,
     seconds: quizConfig.secondsPerQuestion,
@@ -22,6 +24,7 @@ export default function QuizPage() {
   const timeLeft = timerState.questionNumber === questionNumber
     ? timerState.seconds
     : quizConfig.secondsPerQuestion;
+  const areOptionsVisible = revealedQuestionNumber === questionNumber;
   const quizQuestions = useMemo(() => getParticipantQuestions(participant, questions), [participant]);
   const question = quizQuestions[currentIndex];
   const totalQuestions = quizQuestions.length;
@@ -65,6 +68,14 @@ export default function QuizPage() {
     return () => {
       window.clearTimeout(feedbackTimeoutRef.current);
     };
+  }, [questionNumber]);
+
+  useEffect(() => {
+    const revealTimerId = window.setTimeout(() => {
+      setRevealedQuestionNumber(questionNumber);
+    }, OPTION_REVEAL_DELAY_MS);
+
+    return () => window.clearTimeout(revealTimerId);
   }, [questionNumber]);
 
   useEffect(() => {
@@ -216,7 +227,7 @@ export default function QuizPage() {
         </div>
 
         <div className={`options-grid quiz-options ${hasImageOptions ? 'image-options-grid' : ''}`}>
-          {questionOptions.map((option, optionIndex) => (
+          {areOptionsVisible && questionOptions.map((option, optionIndex) => (
             <button
               className={getOptionClassName(option.id)}
               disabled={feedbackOptionIds.length > 0}
