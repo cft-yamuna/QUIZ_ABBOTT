@@ -59,6 +59,7 @@
 
 * {
   box-sizing: border-box;
+  cursor: none !important;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
@@ -82,14 +83,6 @@ input {
 button,
 input {
   font: inherit;
-}
-
-button {
-  cursor: pointer;
-}
-
-button:disabled {
-  cursor: not-allowed;
 }
 
 a {
@@ -440,7 +433,6 @@ a {
 .quiz-page .option-card:disabled,
 .quiz-page .option-card:disabled:hover {
   box-shadow: none;
-  cursor: default;
   opacity: 1;
   transform: none;
 }
@@ -643,7 +635,6 @@ a {
 }
 
 .result-primary-action:disabled {
-  cursor: not-allowed;
   opacity: 0.55;
 }
 
@@ -1165,7 +1156,6 @@ a {
 }
 
 .option-card:disabled {
-  cursor: default;
   opacity: 1;
 }
 
