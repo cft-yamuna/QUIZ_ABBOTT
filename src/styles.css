@@ -59,12 +59,24 @@
 
 * {
   box-sizing: border-box;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
+html,
 body {
   margin: 0;
   min-width: 320px;
-  min-height: 100svh;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
+input {
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 button,
