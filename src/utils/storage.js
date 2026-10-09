@@ -153,11 +153,12 @@ export function getNextParticipantId() {
   return preparedParticipantId;
 }
 
-export function createParticipant({ fullName, email }) {
+export function createParticipant() {
+  const id = getNextParticipantId();
   const participant = {
-    id: getNextParticipantId(),
-    fullName: fullName.trim(),
-    email: email.trim(),
+    id,
+    fullName: `Player ${id.slice(-6)}`,
+    email: `${id.toLowerCase()}@kiosk.invalid`,
     questionOrder: createQuestionOrder(),
     optionOrders: createOptionOrders(),
     answers: {},

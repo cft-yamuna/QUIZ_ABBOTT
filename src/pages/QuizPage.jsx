@@ -94,7 +94,7 @@ export default function QuizPage() {
   }, [feedbackOptionIds.length, goNext, participant, question, questionNumber, timeLeft]);
 
   if (!participant) {
-    return <Navigate to="/register" replace />;
+    return <Navigate to="/" replace />;
   }
 
   if (!question || currentIndex < 0) {

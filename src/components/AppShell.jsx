@@ -6,7 +6,7 @@ export default function AppShell({ children }) {
   const isQuizPage = location.pathname.startsWith('/quiz/');
   const isScorePage = location.pathname === '/score';
   const isLeaderboardPage = location.pathname === '/leaderboard';
-  const isArtworkPage = isStartPage || location.pathname === '/register' || isQuizPage || isScorePage || isLeaderboardPage;
+  const isArtworkPage = isStartPage || isQuizPage || isScorePage || isLeaderboardPage;
 
   return (
     <div className={`app ${isArtworkPage ? 'app-artwork' : ''}`}>

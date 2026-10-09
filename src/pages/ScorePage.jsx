@@ -49,7 +49,7 @@ export default function ScorePage() {
   }, [navigate]);
 
   if (!participant) {
-    return <Navigate to="/register" replace />;
+    return <Navigate to="/" replace />;
   }
 
   const participantQuestions = getParticipantQuestions(participant, questions);
