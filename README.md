@@ -40,9 +40,21 @@ Leaderboard results use the existing `ABBOTT_QUIZ` Supabase table by default. It
 
 To reset test leaderboard entries, run `node scripts/reset-leaderboard.mjs` for a read-only count. The explicit `--confirm-clear-current-leaderboard` flag first saves a private recovery copy in `.leaderboard-backups/`, then deletes only the snapshotted row IDs and verifies removal. Do not run this during an event. Nothing is seeded or cleared at server startup.
 
-The checked-in `vercel.json` deploys only the static Vite frontend; it does not deploy `server.js`. The JSON/JSONL/CSV persistence is suitable only for one long-lived server process with a durable local disk. Do not use it as authoritative state on Vercel Functions or a multi-instance host: those environments require shared durable storage and cross-instance real-time fan-out.
+### Vercel deployment
 
-For a Vercel frontend with a separately hosted backend, run `node server.js --api-only` on one long-lived Node service with HTTPS, WebSocket support, and a persistent disk. Configure Supabase credentials on that service only, and point `GAME_STATE_FILE`, `SESSION_HISTORY_FILE`, `PENDING_RESULTS_FILE`, and `OPERATOR_TOKEN_FILE` to the persistent disk. Set `VITE_API_URL` in the Vercel project to that service's public HTTPS origin (no `/api` suffix), then rebuild the frontend. Both Socket.IO game state and leaderboard HTTP requests use this same origin. Leave the value empty for local use. A frontend deployment alone does not start the backend.
+`vercel.json` deploys the Vite frontend and `api/quiz.js` together. The Vercel build automatically uses the cloud transport: `/operator` and `/display` synchronize against the same Supabase-backed game, refreshing approximately every half second. Local development still uses the existing Socket.IO server.
+
+1. Run the additive migration in `supabase/umc-cloud.sql` once in the existing Supabase project's SQL editor. It creates two private tables and a service-role-only transaction function. Existing leaderboard rows are not changed.
+2. In the Vercel project's **Production** environment, set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` (Secret). Never prefix the service key with `VITE_`, commit it, or put it in browser code. Leave `VITE_API_URL` empty for this same-origin setup.
+3. Push `main` or redeploy after changing environment variables. Verify `/api/quiz` returns JSON and both `/operator` and `/display` connect.
+
+Game deadlines are stored in the database and evaluated on each request; there are no authoritative in-memory timers or local files in the cloud backend. Postgres compare-and-swap rejects stale/duplicate actions across instances. Finishing a run atomically archives it and inserts its leaderboard result once. If storage fails, actions are not acknowledged as successful. Preview environments are separate rooms and never insert test scores into the production leaderboard; use separate preview credentials/database when enabling them.
+
+The kiosk's existing access model is preserved: anyone who can access `/operator` can control the event, while `/display` receives public state only. The operator role declaration is not authentication. Use deployment access protection if the event should not be publicly controllable.
+
+The JSON/JSONL/CSV persistence described above applies only to the single-process local server, not Vercel. `QUIZ_CLOUD=1 npm run build` builds the cloud client locally for verification.
+
+Alternatively, for a separately hosted Socket.IO backend, run `node server.js --api-only` on one long-lived Node service with HTTPS, WebSocket support, and a persistent disk. Configure Supabase credentials on that service only, and point `GAME_STATE_FILE`, `SESSION_HISTORY_FILE`, `PENDING_RESULTS_FILE`, and `OPERATOR_TOKEN_FILE` to the persistent disk. Set `VITE_API_URL` to that service's HTTPS origin (no `/api` suffix), then rebuild. A nonempty value selects the external Socket.IO backend instead of the Vercel API.
 
 Configure the server with `.env.local`:
 

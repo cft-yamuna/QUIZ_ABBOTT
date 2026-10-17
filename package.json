@@ -9,7 +9,7 @@
     "server": "node server.js --production",
     "start": "vite build && node server.js --production",
     "build": "vite build",
-    "test": "node --test --test-concurrency=1 tests/quiz-flow.test.js",
+    "test": "node --test --test-concurrency=1 tests/*.test.js",
     "preview": "vite preview"
   },
   "dependencies": {

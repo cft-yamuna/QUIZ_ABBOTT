@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
 import { API_BASE_URL } from '../config.js';
+import { createCloudQuizTransport } from '../utils/cloudQuizTransport.js';
 
 export function useQuizSocket({ operator = false } = {}) {
   const socketRef = useRef(null);
@@ -12,7 +13,7 @@ export function useQuizSocket({ operator = false } = {}) {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const socket = io(API_BASE_URL || undefined, {
+    const socket = __QUIZ_CLOUD__ && !API_BASE_URL ? createCloudQuizTransport({ operator }) : io(API_BASE_URL || undefined, {
       auth: { operator },
       transports: ['websocket'],
     });

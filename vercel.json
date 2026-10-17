@@ -1,7 +1,12 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "regions": ["sin1"],
+  "functions": { "api/quiz.js": { "maxDuration": 30 } },
   "rewrites": [
+    { "source": "/api/results", "destination": "/api/quiz?resource=results" },
+    { "source": "/api/game", "destination": "/api/quiz" },
+    { "source": "/api/quiz", "destination": "/api/quiz" },
     {
       "source": "/(.*)",
       "destination": "/index.html"
