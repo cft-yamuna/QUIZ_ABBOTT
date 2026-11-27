@@ -10,14 +10,24 @@ import { startParticipant } from '../utils/storage.js';
  * autoComplete is off on every field so the kiosk never offers the previous
  * player's details.
  */
+const PHONE_DIGITS = 10;
+
 const FIELDS = [
   { key: 'name', label: 'Your name', placeholder: 'Your name', type: 'text', maxLength: 40 },
   { key: 'email', label: 'Email', placeholder: 'Email', type: 'email', inputMode: 'email', maxLength: 80 },
-  { key: 'phone', label: 'Phone number', placeholder: 'Phone Number', type: 'tel', inputMode: 'tel', maxLength: 20 },
+  // Digits only, and typing stops at the 10th.
+  {
+    key: 'phone',
+    label: 'Phone number',
+    placeholder: 'Phone Number',
+    type: 'tel',
+    inputMode: 'numeric',
+    maxLength: PHONE_DIGITS,
+    sanitize: (value) => value.replace(/\D/g, '').slice(0, PHONE_DIGITS),
+  },
 ];
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_PATTERN = /^\+?[\d\s()-]+$/;
 // The brief asks for "work email or phone", so either one is enough.
 const CONTACT_MISSING = 'Please enter your email or phone number.';
 
@@ -38,10 +48,9 @@ function validate({ name, email, phone }) {
     errors.email = 'Please enter a valid email address.';
   }
 
-  // 10 digits for an Indian mobile, up to 15 with a country code (E.164).
-  const digitCount = trimmedPhone.replace(/\D/g, '').length;
-  if (trimmedPhone && (!PHONE_PATTERN.test(trimmedPhone) || digitCount < 10 || digitCount > 15)) {
-    errors.phone = 'Please enter a valid phone number.';
+  // The input only holds digits, so all that's left to check is that there are exactly 10.
+  if (trimmedPhone && trimmedPhone.length !== PHONE_DIGITS) {
+    errors.phone = 'Please enter a valid 10-digit phone number.';
   }
 
   return errors;
@@ -116,7 +125,10 @@ export default function NamePage() {
                 id={id}
                 inputMode={field.inputMode}
                 maxLength={field.maxLength}
-                onChange={(event) => handleChange(field.key, event.target.value)}
+                onChange={(event) => {
+                  const { value } = event.target;
+                  handleChange(field.key, field.sanitize ? field.sanitize(value) : value);
+                }}
                 placeholder={field.placeholder}
                 ref={(element) => {
                   inputRefs.current[field.key] = element;

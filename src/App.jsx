@@ -1,4 +1,5 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import FullscreenToggle from './components/FullscreenToggle.jsx';
 import Stage from './components/Stage.jsx';
 import ExplainedPage from './pages/ExplainedPage.jsx';
@@ -8,9 +9,17 @@ import QuestionPage from './pages/QuestionPage.jsx';
 import ResultPage from './pages/ResultPage.jsx';
 import WelcomePage from './pages/WelcomePage.jsx';
 import WrapPage from './pages/WrapPage.jsx';
+import { setOnWelcomeScreen } from './pwa.js';
 
 // Welcome → Name → How it works → 6 questions → Wrap → Result → Explained → Welcome
 export default function App() {
+  const { pathname } = useLocation();
+
+  // A new app version waits for the welcome screen before it reloads the kiosk.
+  useEffect(() => {
+    setOnWelcomeScreen(pathname === '/');
+  }, [pathname]);
+
   return (
     <>
       <Stage>
