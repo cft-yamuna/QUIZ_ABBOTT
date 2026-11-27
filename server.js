@@ -127,9 +127,10 @@ app.post('/api/results', async (req, res) => {
   const email = typeof req.body?.email === 'string' ? req.body.email.trim() : '';
   const score = Number(req.body?.score);
 
-  if (!name || !email || !Number.isFinite(score)) {
+  // Email is optional: the Talent Challenge flow only asks for a name.
+  if (!name || !Number.isFinite(score)) {
     res.status(400).json({
-      message: 'Name, email, and numeric score are required.',
+      message: 'Name and numeric score are required.',
     });
     return;
   }

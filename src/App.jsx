@@ -1,68 +1,31 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
-import AppShell from './components/AppShell.jsx';
 import FullscreenToggle from './components/FullscreenToggle.jsx';
-import StartPage from './pages/StartPage.jsx';
-import RegistrationPage from './pages/RegistrationPage.jsx';
-import QuizPage from './pages/QuizPage.jsx';
-import ScorePage from './pages/ScorePage.jsx';
-import LeaderboardPage from './pages/LeaderboardPage.jsx';
-import congratsFrame from './images/cong.png';
-import emailField from './images/email.png';
-import leaderboardArtwork from './images/fp5.png';
-import nameField from './images/name.png';
-import quizArtwork from './images/fp3.png';
-import registerArtwork from './images/fp2.png';
-import resultArtwork from './images/fp4.png';
-import startArtwork from './images/fp1.png';
-import startButton from './images/start.png';
-import submitButton from './images/submit.png';
+import Stage from './components/Stage.jsx';
+import ExplainedPage from './pages/ExplainedPage.jsx';
+import HowItWorksPage from './pages/HowItWorksPage.jsx';
+import NamePage from './pages/NamePage.jsx';
+import QuestionPage from './pages/QuestionPage.jsx';
+import ResultPage from './pages/ResultPage.jsx';
+import WelcomePage from './pages/WelcomePage.jsx';
+import WrapPage from './pages/WrapPage.jsx';
 
-const PRELOAD_IMAGES = [
-  startArtwork,
-  registerArtwork,
-  quizArtwork,
-  resultArtwork,
-  leaderboardArtwork,
-  congratsFrame,
-  nameField,
-  emailField,
-  startButton,
-  submitButton,
-];
-
-function preloadImages() {
-  if (typeof document === 'undefined') return;
-
-  PRELOAD_IMAGES.forEach((src) => {
-    if (!document.querySelector(`link[rel="preload"][href="${src}"]`)) {
-      const link = document.createElement('link');
-      link.as = 'image';
-      link.href = src;
-      link.rel = 'preload';
-      document.head.appendChild(link);
-    }
-
-    const image = new Image();
-    image.decoding = 'async';
-    image.src = src;
-    image.decode?.().catch(() => {});
-  });
-}
-
-preloadImages();
-
+// Welcome → Name → How it works → 6 questions → Wrap → Result → Explained → Welcome
 export default function App() {
   return (
-    <AppShell>
-      <Routes>
-        <Route path="/" element={<StartPage />} />
-        <Route path="/register" element={<RegistrationPage />} />
-        <Route path="/quiz/:questionNumber" element={<QuizPage />} />
-        <Route path="/score" element={<ScorePage />} />
-        <Route path="/leaderboard" element={<LeaderboardPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+    <>
+      <Stage>
+        <Routes>
+          <Route path="/" element={<WelcomePage />} />
+          <Route path="/name" element={<NamePage />} />
+          <Route path="/how-it-works" element={<HowItWorksPage />} />
+          <Route path="/quiz/:questionNumber" element={<QuestionPage />} />
+          <Route path="/wrap" element={<WrapPage />} />
+          <Route path="/result" element={<ResultPage />} />
+          <Route path="/explained" element={<ExplainedPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Stage>
       <FullscreenToggle />
-    </AppShell>
+    </>
   );
 }

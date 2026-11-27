@@ -1,224 +1,125 @@
-import siteA from '../images/site-a.png';
-import siteB from '../images/site-b.png';
-import siteC from '../images/site-c.png';
-import siteD from '../images/site-d.png';
-
 export const quizConfig = {
-  questionCount: 5,
-  secondsPerQuestion: 25,
+  secondsPerQuestion: 10,
+  // "3 Choices Per Question" on How it works is the design's copy. Question 5
+  // is true/false and only has two.
+  choicesPerQuestion: 3,
 };
 
+/*
+ * The six Talent Challenge questions, in the fixed order the Figma frames
+ * show them. "Your Quiz, Explained" numbers its cards 1-6 against this
+ * order, so the questions are deliberately not shuffled.
+ *
+ * `track` splits the quiz in two halves that drive the talent title:
+ * 1, 3 and 5 test employer branding; 2, 4 and 6 test Indeed's hiring products.
+ */
 export const questions = [
   {
     id: 'q1',
-    text: 'FreeStyle Libre 2 Plus provides glucose readings at what frequency?',
+    track: 'brand',
+    text: "Before applying, a candidate asks an AI assistant what it's like to work at your company. What share of candidates changed their mind about a company because of what AI told them?",
     options: [
-      { id: 'a', text: 'Every 5 minutes' },
-      { id: 'b', text: 'Every 15 minutes' },
-      { id: 'c', text: 'Every hour' },
-      { id: 'd', text: 'Every minute' },
+      { id: 'a', text: '62%' },
+      { id: 'b', text: '82%' },
+      { id: 'c', text: '98%' },
     ],
-    correctOptionId: 'd',
+    correctOptionId: 'b',
+    explanation: '82% of candidates changed their\nmind about a company because of\nwhat AI told them.',
   },
   {
     id: 'q2',
-    text: 'FreeStyle Libre 2 Plus is indicated for people of which age group?',
+    track: 'hiring',
+    text: 'Your company is opening a new capability centre in Bengaluru and needs 20 software engineers within a month. Which Indeed product puts these jobs at the top of search results?',
     options: [
-      { id: 'a', text: 'Adults only' },
-      { id: 'b', text: 'Children above 10 years' },
-      { id: 'c', text: 'People aged 2 years and older' },
-      { id: 'd', text: 'People aged 18 years and older' },
+      { id: 'a', text: 'Indeed Hiring Events' },
+      { id: 'b', text: 'Premium Sponsored Jobs' },
+      { id: 'c', text: 'Employer Branding Ads' },
     ],
-    correctOptionId: 'c',
+    correctOptionId: 'b',
+    explanation: 'Premium Sponsored Jobs: Urgently\nHiring and First Page Boost give\ncritical roles maximum visibility in search.',
   },
   {
     id: 'q3',
-    text: 'What is the temperature range at which FreeStyle Libre 2 Plus must be stored?',
+    track: 'brand',
+    text: "Your team is deciding where to invest in employer brand content. According to Indeed's India survey, at which stage do 59% of candidates research an employer?",
     options: [
-      { id: 'a', text: '2 to 8 C' },
-      { id: 'b', text: '4 to 25 C' },
-      { id: 'c', text: '-10 to -20 C' },
-      { id: 'd', text: 'No specific storage conditions' },
+      { id: 'a', text: 'Before they apply' },
+      { id: 'b', text: 'Between applying and the interview' },
+      { id: 'c', text: 'After they get an offer' },
     ],
     correctOptionId: 'b',
+    explanation: "Candidates keep checking you\neven after they've applied.",
   },
   {
     id: 'q4',
-    text: 'Which statement about finger prick testing with FreeStyle Libre 2 Plus is correct?',
+    track: 'hiring',
+    text: 'Your new Bengaluru capability centre receives 800 applications for one data analyst role. Which Indeed tool uses AI to score and summarise each one against your criteria?',
     options: [
-      { id: 'a', text: 'Finger pricks are mandatory before every reading' },
-      { id: 'b', text: 'Finger pricks are required daily' },
-      { id: 'c', text: 'Finger pricks are never required' },
-      { id: 'd', text: "Finger pricks are required only if readings don't match symptoms" },
+      { id: 'a', text: 'Hiring Insights' },
+      { id: 'b', text: 'Smart Screening' },
+      { id: 'c', text: 'Indeed Apply + ATS Integration' },
     ],
-    correctOptionId: 'd',
+    correctOptionId: 'b',
+    explanation: 'Smart Screening uses AI to score every\napplication and sends candidate summaries to\nyour ATS. Coming to India in 2027.',
   },
   {
     id: 'q5',
-    text: 'Which of the following is a proven clinical benefit of FreeStyle Libre systems?',
+    track: 'brand',
+    text: 'Your leadership team believes Brand Score only tracks awareness, with no link to how many candidates actually apply. True or false?',
+    // Figma sets this one in a narrower box so it breaks onto three lines.
+    textWidth: 1120,
     options: [
-      { id: 'a', text: 'Reduced HbA1c' },
-      { id: 'b', text: 'Increased Time in Range' },
-      { id: 'c', text: 'Reduced hypoglycaemia' },
-      { id: 'd', text: 'All the above' },
+      { id: 'a', text: 'True' },
+      { id: 'b', text: 'False' },
     ],
-    correctOptionId: 'd',
+    correctOptionId: 'b',
+    explanation: 'False. A 10-point rise in Brand\nScore is associated with roughly 14\npercentile points more apply starts.',
   },
   {
     id: 'q6',
-    text: 'Correct site of application of a sensor:',
+    track: 'hiring',
+    text: 'Your recruiters spend hours every week copying Indeed applicants into your hiring system by hand. Which Indeed solution sends these applications there automatically?',
     options: [
-      { id: 'a', text: 'Site option A', image: siteA },
-      { id: 'b', text: 'Site option B', image: siteB },
-      { id: 'c', text: 'Site option C', image: siteC },
-      { id: 'd', text: 'Site option D', image: siteD },
-    ],
-    correctOptionId: 'b',
-  },
-  {
-    id: 'q7',
-    text: 'In patients receiving GLP 1 receptor agonist therapy, FreeStyle Libre use results in:',
-    options: [
-      { id: 'a', text: 'No additional benefit' },
-      { id: 'b', text: 'Reduced insulin requirement only' },
-      { id: 'c', text: 'Greater HbA1c reduction' },
-      { id: 'd', text: 'Increased hypoglycaemia' },
-    ],
-    correctOptionIds: ['b', 'c'],
-  },
-  {
-    id: 'q8',
-    text: 'What do ADA and APAC guidelines recommend for glucose monitoring?',
-    options: [
-      { id: 'a', text: 'HbA1c alone is sufficient' },
-      { id: 'b', text: 'BGM should replace CGM' },
-      { id: 'c', text: 'CGM along with HbA1c for people with diabetes' },
-      { id: 'd', text: 'CGM only for Type 1 Diabetes' },
+      { id: 'a', text: 'Smart Screening' },
+      { id: 'b', text: 'Indeed Analytics' },
+      { id: 'c', text: 'Indeed Apply + ATS Integration' },
     ],
     correctOptionId: 'c',
-  },
-  {
-    id: 'q9',
-    text: 'Compared to traditional blood glucose monitoring (BGM), CGM provides:',
-    options: [
-      { id: 'a', text: 'Less glucose data' },
-      { id: 'b', text: 'Only fasting glucose values' },
-      { id: 'c', text: 'Continuous, real time glucose trends' },
-      { id: 'd', text: 'Only laboratory based readings' },
-    ],
-    correctOptionId: 'c',
-  },
-  {
-    id: 'q10',
-    text: 'What is LibreView?',
-    options: [
-      { id: 'a', text: 'A glucose sensor' },
-      { id: 'b', text: 'A laboratory software' },
-      { id: 'c', text: 'A cloud based CGM data management platform' },
-      { id: 'd', text: 'An insulin delivery system' },
-    ],
-    correctOptionId: 'c',
-  },
-  {
-    id: 'q11',
-    text: "It is mandatory to connect HCP's LibreView account with patient's FreeStyle LibreLink App, to view the AGP report",
-    options: [
-      { id: 'a', text: 'True' },
-      { id: 'b', text: 'False' },
-    ],
-    correctOptionId: 'a',
-  },
-  {
-    id: 'q12',
-    text: "Patient's caregiver can get real time readings and alarms while patient is using FreeStyle Libre 2 Plus sensor",
-    options: [
-      { id: 'a', text: 'True' },
-      { id: 'b', text: 'False' },
-    ],
-    correctOptionId: 'a',
-  },
-  {
-    id: 'q13',
-    text: 'Which of the following statement is true?',
-    options: [
-      { id: 'a', text: 'When it comes to clinical outcomes and patient safety, not all CGMs are created equal' },
-      { id: 'b', text: 'US FDA requirements for Integrated Continuous Glucose Monitoring (iCGM) are the most rigorous of any major regulatory body' },
-      { id: 'c', text: 'MARD alone may not reflect clinical accuracy across the entire glucose range' },
-      { id: 'd', text: 'All the above' },
-    ],
-    correctOptionId: 'd',
-  },
-  {
-    id: 'q14',
-    text: 'iCGM systems are required to meet accuracy performance:',
-    options: [
-      { id: 'a', text: 'Only during stable glucose periods' },
-      { id: 'b', text: 'Only in adults' },
-      { id: 'c', text: 'Across the entire glucose range and rate of change conditions' },
-      { id: 'd', text: 'Only above 70 mg/dL' },
-    ],
-    correctOptionId: 'c',
-  },
-  {
-    id: 'q15',
-    text: 'FreeStyle Libre 2 Plus is approved for usage in patients with GDM:',
-    options: [
-      { id: 'a', text: 'True' },
-      { id: 'b', text: 'False' },
-    ],
-    correctOptionId: 'a',
-  },
-  {
-    id: 'q16',
-    text: "Alarms in FreeStyle Libre 2 Plus can be customized as per the HCP's recommendation:",
-    options: [
-      { id: 'a', text: 'True - the glycemic limits for the alarms can be altered' },
-      { id: 'b', text: "False - they are factory calibrated and hence can't be altered" },
-    ],
-    correctOptionId: 'a',
-  },
-  {
-    id: 'q17',
-    text: 'FreeStyle Libre 2 Plus can be used for:',
-    options: [
-      { id: 'a', text: '7 days' },
-      { id: 'b', text: '10 days' },
-      { id: 'c', text: '14 days' },
-      { id: 'd', text: '15 days' },
-    ],
-    correctOptionId: 'd',
-  },
-  {
-    id: 'q18',
-    text: 'FreeStyle Libre 2 Plus has a MARD of:',
-    options: [
-      { id: 'a', text: '11.7%' },
-      { id: 'b', text: '9.4%' },
-      { id: 'c', text: '8.2%' },
-      { id: 'd', text: '9.1%' },
-    ],
-    correctOptionId: 'c',
-  },
-  {
-    id: 'q19',
-    text: 'What is the recommended glycemic range for an expectant mother?',
-    options: [
-      { id: 'a', text: '70 - 180 mg/dl' },
-      { id: 'b', text: '80 - 170 mg/dl' },
-      { id: 'c', text: '63 - 140 mg/dl' },
-      { id: 'd', text: '70 - 140 mg/dl' },
-    ],
-    correctOptionId: 'c',
-  },
-  {
-    id: 'q20',
-    text: 'What is the correct site of application for FreeStyle Libre 2 Plus sensor?',
-    options: [
-      { id: 'a', text: 'Side of the arm' },
-      { id: 'b', text: 'Back side of the upper arm' },
-      { id: 'c', text: 'Stomach' },
-      { id: 'd', text: 'Any site on the body' },
-    ],
-    correctOptionId: 'b',
+    explanation: 'Indeed Apply + ATS Integration\nsyncs applications straight into your\nexisting ATS, with no manual work.',
   },
 ];
+
+export function isAnswerCorrect(question, answer) {
+  return Boolean(answer) && answer === question.correctOptionId;
+}
+
+export function calculateScore(answers) {
+  return questions.filter((question) => isAnswerCorrect(question, answers?.[question.id])).length;
+}
+
+/*
+ * The Figma file lists eight titles but doesn't say which score earns which.
+ * This mapping is our assumption: a perfect score is the Champion, a clean
+ * sweep of one half names that strength, and the rest step down by how much
+ * of each half was right.
+ */
+export function getTalentTitle(answers) {
+  const correct = { brand: 0, hiring: 0 };
+  const total = { brand: 0, hiring: 0 };
+
+  questions.forEach((question) => {
+    total[question.track] += 1;
+    if (isAnswerCorrect(question, answers?.[question.id])) correct[question.track] += 1;
+  });
+
+  const { brand, hiring } = correct;
+
+  if (brand === total.brand && hiring === total.hiring) return 'Talent Strategy Champion';
+  if (brand === total.brand) return 'Employer Branding Expert';
+  if (hiring === total.hiring) return 'Hiring Maestro';
+  if (brand >= 2 && hiring >= 2) return 'Talent All-Rounder';
+  if (brand >= 2) return 'Employer Brand Builder';
+  if (hiring >= 2) return 'Hiring Pro';
+  if (brand >= 1 && hiring >= 1) return 'Rising Talent Strategist';
+  return 'Talent Explorer';
+}

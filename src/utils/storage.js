@@ -1,71 +1,25 @@
-import { questions, quizConfig } from '../data/questions.js';
+import { calculateScore } from '../data/questions.js';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL || '').replace(/\/$/, '');
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 const SUPABASE_TABLE = import.meta.env.VITE_SUPABASE_TABLE || 'ABBOTT_QUIZ';
-const QUIZ_QUESTION_COUNT = quizConfig.questionCount;
 
+// One player at a time on the kiosk, so the session lives in memory and a
+// reload starts the flow over.
 let currentParticipant = null;
-let preparedParticipantId = null;
-let activeFinalizeParticipantId = null;
-let activeFinalizePromise = null;
-
-function createEntryId() {
-  if (window.crypto?.randomUUID) {
-    return window.crypto.randomUUID();
-  }
-
-  return '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, (char) => {
-    return (Number(char) ^ (Math.random() * 16 >> Number(char) / 4)).toString(16);
-  });
-}
+const savesByParticipantId = new Map();
 
 function createParticipantId() {
   return `USER${String(Date.now()).slice(-6)}${Math.random().toString(16).slice(2, 4).toUpperCase()}`;
 }
 
-function shuffleItems(items) {
-  const shuffled = [...items];
-
-  for (let index = shuffled.length - 1; index > 0; index -= 1) {
-    const randomIndex = Math.floor(Math.random() * (index + 1));
-    [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
-  }
-
-  return shuffled;
-}
-
-function createQuestionOrder() {
-  return shuffleItems(questions.map((question) => question.id));
-}
-
-function createOptionOrders() {
-  return Object.fromEntries(
-    questions.map((question) => [
-      question.id,
-      shuffleItems(question.options.map((option) => option.id)),
-    ]),
-  );
-}
-
-async function requestJSON(path, options = {}) {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-  });
+async function readJSON(response, fallbackMessage) {
   const contentType = response.headers.get('content-type') || '';
   const payload = contentType.includes('application/json') ? await response.json().catch(() => null) : null;
 
   if (!response.ok) {
-    throw new Error(payload?.message || 'Unable to reach the quiz backend.');
-  }
-
-  if (!contentType.includes('application/json')) {
-    throw new Error('Unable to reach the quiz backend.');
+    throw new Error(payload?.message || payload?.hint || fallbackMessage);
   }
 
   return payload;
@@ -75,236 +29,77 @@ function hasSupabaseConfig() {
   return Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 }
 
-async function requestSupabase(path, options = {}) {
-  if (!hasSupabaseConfig()) {
-    throw new Error('Supabase URL and anon key are missing.');
-  }
-
-  const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-    ...options,
-    headers: {
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-  });
-  const contentType = response.headers.get('content-type') || '';
-  const payload = contentType.includes('application/json') ? await response.json().catch(() => null) : null;
-
-  if (!response.ok) {
-    throw new Error(payload?.message || payload?.hint || 'Unable to reach Supabase.');
-  }
-
-  return payload;
-}
-
-function mapSupabaseEntry(row) {
-  return {
-    entryId: String(row.id),
-    name: row.name || '',
-    email: row.email || '',
-    score: Number(row.score),
-    completedAt: row.created_at,
-  };
-}
-
-function sortLeaderboard(entries) {
-  return [...entries].sort((a, b) => {
-    if (b.score !== a.score) return b.score - a.score;
-    return new Date(a.completedAt || 0).getTime() - new Date(b.completedAt || 0).getTime();
-  });
-}
-
-export async function getLeaderboard() {
+async function postResult(result) {
   if (hasSupabaseConfig()) {
-    const params = new URLSearchParams();
-    params.set('select', 'id,name,email,score,created_at');
-    params.set('order', 'score.desc,created_at.asc');
-
-    const rows = await requestSupabase(`${encodeURIComponent(SUPABASE_TABLE)}?${params.toString()}`);
-    return Array.isArray(rows) ? rows.map(mapSupabaseEntry) : [];
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/${encodeURIComponent(SUPABASE_TABLE)}`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal',
+      },
+      body: JSON.stringify(result),
+    });
+    return readJSON(response, 'Unable to reach Supabase.');
   }
 
-  return requestJSON('/api/results');
-}
-
-export async function getSortedLeaderboard() {
-  return sortLeaderboard(await getLeaderboard());
+  const response = await fetch(`${API_BASE_URL}/api/results`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(result),
+  });
+  return readJSON(response, 'Unable to reach the quiz backend.');
 }
 
 export function getCurrentParticipant() {
   return currentParticipant;
 }
 
-export function saveCurrentParticipant(participant) {
-  currentParticipant = participant;
+export function startParticipant(fullName) {
+  currentParticipant = {
+    id: createParticipantId(),
+    fullName: fullName.trim(),
+    answers: {},
+    startedAt: new Date().toISOString(),
+  };
+
+  return currentParticipant;
+}
+
+export function recordAnswer(questionId, optionId) {
+  if (!currentParticipant) return;
+
+  currentParticipant = {
+    ...currentParticipant,
+    answers: { ...currentParticipant.answers, [questionId]: optionId },
+  };
 }
 
 export function clearCurrentParticipant() {
   currentParticipant = null;
 }
 
-export function getNextParticipantId() {
-  if (!preparedParticipantId) {
-    preparedParticipantId = createParticipantId();
+/*
+ * Saves the finished run once per participant. It's best effort: the result
+ * screens work from local state, so a failed save is logged and never
+ * blocks the player.
+ */
+export function saveResult(participant) {
+  if (!participant) return Promise.resolve();
+
+  if (!savesByParticipantId.has(participant.id)) {
+    const save = postResult({
+      name: participant.fullName,
+      // The Figma flow asks for a name only.
+      email: '',
+      score: calculateScore(participant.answers),
+    }).catch((error) => {
+      console.warn('Quiz result was not saved:', error.message);
+    });
+
+    savesByParticipantId.set(participant.id, save);
   }
 
-  return preparedParticipantId;
-}
-
-export function createParticipant({ fullName, email }) {
-  const participant = {
-    id: getNextParticipantId(),
-    fullName: fullName.trim(),
-    email: email.trim(),
-    questionOrder: createQuestionOrder(),
-    optionOrders: createOptionOrders(),
-    answers: {},
-    startedAt: new Date().toISOString(),
-    completedAt: null,
-    leaderboardEntryId: null,
-  };
-
-  preparedParticipantId = null;
-  saveCurrentParticipant(participant);
-  return participant;
-}
-
-export function updateParticipantAnswer(questionId, optionId) {
-  const participant = getCurrentParticipant();
-  if (!participant) return null;
-
-  const updated = {
-    ...participant,
-    answers: {
-      ...participant.answers,
-      [questionId]: optionId,
-    },
-  };
-
-  saveCurrentParticipant(updated);
-  return updated;
-}
-
-function getCorrectOptionIds(question) {
-  return question.correctOptionIds || [question.correctOptionId];
-}
-
-function hasAllCorrectOptionIds(answer, correctOptionIds) {
-  const selectedOptionIds = Array.isArray(answer) ? answer : answer ? [answer] : [];
-
-  return (
-    selectedOptionIds.length === correctOptionIds.length
-    && correctOptionIds.every((optionId) => selectedOptionIds.includes(optionId))
-  );
-}
-
-export function calculateScore(answers, quizQuestions = questions) {
-  return quizQuestions.reduce((score, question) => {
-    return hasAllCorrectOptionIds(answers?.[question.id], getCorrectOptionIds(question)) ? score + 1 : score;
-  }, 0);
-}
-
-export function getParticipantQuestions(participant, quizQuestions = questions) {
-  const questionsById = new Map(quizQuestions.map((question) => [question.id, question]));
-  const orderedIds = Array.isArray(participant?.questionOrder) ? participant.questionOrder : [];
-  const orderedQuestions = orderedIds.map((questionId) => questionsById.get(questionId)).filter(Boolean);
-
-  if (orderedQuestions.length > 0) {
-    return orderedQuestions.slice(0, QUIZ_QUESTION_COUNT);
-  }
-
-  return quizQuestions.slice(0, QUIZ_QUESTION_COUNT);
-}
-
-export function getParticipantOptions(participant, question) {
-  const orderedIds = Array.isArray(participant?.optionOrders?.[question?.id])
-    ? participant.optionOrders[question.id]
-    : [];
-  const optionsById = new Map((question?.options || []).map((option) => [option.id, option]));
-  const orderedOptions = orderedIds.map((optionId) => optionsById.get(optionId)).filter(Boolean);
-
-  if (orderedOptions.length === question?.options.length) {
-    return orderedOptions;
-  }
-
-  return question?.options || [];
-}
-
-export async function finalizeCurrentParticipant(quizQuestions = questions) {
-  const participant = getCurrentParticipant();
-  if (!participant) return null;
-
-  if (participant.leaderboardEntry) {
-    return participant.leaderboardEntry;
-  }
-
-  if (activeFinalizeParticipantId === participant.id && activeFinalizePromise) {
-    return activeFinalizePromise;
-  }
-
-  activeFinalizeParticipantId = participant.id;
-  activeFinalizePromise = (async () => {
-    const score = calculateScore(participant.answers, quizQuestions);
-    const total = quizQuestions.length;
-    const completedAt = new Date().toISOString();
-    const savedResult = hasSupabaseConfig()
-      ? await requestSupabase(`${encodeURIComponent(SUPABASE_TABLE)}?select=id,name,email,score,created_at`, {
-          method: 'POST',
-          headers: {
-            Prefer: 'return=representation',
-          },
-          body: JSON.stringify({
-            name: participant.fullName,
-            email: participant.email,
-            score,
-          }),
-        }).then((rows) => (Array.isArray(rows) && rows[0] ? mapSupabaseEntry(rows[0]) : {
-          entryId: createEntryId(),
-          name: participant.fullName,
-          email: participant.email,
-          score,
-          completedAt,
-        }))
-      : await requestJSON('/api/results', {
-          method: 'POST',
-          body: JSON.stringify({
-            name: participant.fullName,
-            email: participant.email,
-            score,
-          }),
-        });
-    const savedScore = Number(savedResult.score ?? score);
-    const savedCompletedAt = savedResult.completedAt || completedAt;
-    const entry = {
-      entryId: savedResult.entryId || createEntryId(),
-      name: savedResult.name || participant.fullName,
-      email: savedResult.email || participant.email,
-      score: savedScore,
-      total,
-      percentage: Math.round((savedScore / total) * 100),
-      completedAt: savedCompletedAt,
-    };
-
-    const latestParticipant = getCurrentParticipant();
-
-    if (latestParticipant?.id === participant.id) {
-      saveCurrentParticipant({
-        ...latestParticipant,
-        completedAt: savedCompletedAt,
-        leaderboardEntryId: entry.entryId,
-        leaderboardEntry: entry,
-      });
-    }
-
-    return entry;
-  })();
-
-  try {
-    return await activeFinalizePromise;
-  } finally {
-    activeFinalizePromise = null;
-    activeFinalizeParticipantId = null;
-  }
+  return savesByParticipantId.get(participant.id);
 }
