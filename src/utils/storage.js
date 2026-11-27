@@ -1,4 +1,4 @@
-import { calculateScore } from '../data/questions.js';
+import { calculateScore, getTalentTag } from '../data/questions.js';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL || '').replace(/\/$/, '');
@@ -19,7 +19,9 @@ async function readJSON(response, fallbackMessage) {
   const payload = contentType.includes('application/json') ? await response.json().catch(() => null) : null;
 
   if (!response.ok) {
-    throw new Error(payload?.message || payload?.hint || fallbackMessage);
+    const error = new Error(payload?.message || payload?.hint || fallbackMessage);
+    error.status = response.status;
+    throw error;
   }
 
   return payload;
@@ -29,19 +31,46 @@ function hasSupabaseConfig() {
   return Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 }
 
+async function insertIntoSupabase(row) {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/${encodeURIComponent(SUPABASE_TABLE)}`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=minimal',
+    },
+    body: JSON.stringify(row),
+  });
+  return readJSON(response, 'Unable to reach Supabase.');
+}
+
+// Columns added after the table was first made. Until each one exists in
+// Supabase, rows are saved without it rather than the whole lead being lost.
+const OPTIONAL_COLUMNS = ['phone', 'tag'];
+
+// Postgres and PostgREST both name the column when it doesn't exist.
+function findMissingColumn(error, row) {
+  if (error.status !== 400) return null;
+  return OPTIONAL_COLUMNS.find((column) => column in row && new RegExp(`\\b${column}\\b`, 'i').test(error.message));
+}
+
+async function insertWithoutMissingColumns(row) {
+  try {
+    return await insertIntoSupabase(row);
+  } catch (error) {
+    const column = findMissingColumn(error, row);
+    if (!column) throw error;
+
+    console.warn(`Supabase table has no ${column} column; saved this result without it.`);
+    const { [column]: _dropped, ...rest } = row;
+    return insertWithoutMissingColumns(rest);
+  }
+}
+
 async function postResult(result) {
   if (hasSupabaseConfig()) {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/${encodeURIComponent(SUPABASE_TABLE)}`, {
-      method: 'POST',
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        'Content-Type': 'application/json',
-        Prefer: 'return=minimal',
-      },
-      body: JSON.stringify(result),
-    });
-    return readJSON(response, 'Unable to reach Supabase.');
+    return insertWithoutMissingColumns(result);
   }
 
   const response = await fetch(`${API_BASE_URL}/api/results`, {
@@ -56,10 +85,12 @@ export function getCurrentParticipant() {
   return currentParticipant;
 }
 
-export function startParticipant(fullName) {
+export function startParticipant({ name, email = '', phone = '' }) {
   currentParticipant = {
     id: createParticipantId(),
-    fullName: fullName.trim(),
+    fullName: name.trim(),
+    email: email.trim(),
+    phone: phone.trim(),
     answers: {},
     startedAt: new Date().toISOString(),
   };
@@ -91,9 +122,10 @@ export function saveResult(participant) {
   if (!savesByParticipantId.has(participant.id)) {
     const save = postResult({
       name: participant.fullName,
-      // The Figma flow asks for a name only.
-      email: '',
+      email: participant.email,
+      phone: participant.phone,
       score: calculateScore(participant.answers),
+      tag: getTalentTag(participant.answers).title,
     }).catch((error) => {
       console.warn('Quiz result was not saved:', error.message);
     });

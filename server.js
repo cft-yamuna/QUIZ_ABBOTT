@@ -11,7 +11,8 @@ const app = express();
 const PORT = Number(process.env.PORT || 3002);
 const resultsFilePath = path.resolve(process.env.RESULTS_FILE || path.join(__dirname, 'results.csv'));
 const distPath = path.join(__dirname, 'dist');
-const csvHeaders = ['entryId', 'name', 'email', 'score', 'completedAt'];
+// New columns go on the end so a results.csv written before them still reads correctly.
+const csvHeaders = ['entryId', 'name', 'email', 'score', 'completedAt', 'phone', 'tag'];
 let writeQueue = Promise.resolve();
 
 app.use((req, res, next) => {
@@ -30,11 +31,22 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 async function ensureResultsFile() {
+  const headerLine = csvHeaders.join(',');
+  let content;
+
   try {
-    await fsp.access(resultsFilePath);
+    content = await fsp.readFile(resultsFilePath, 'utf8');
   } catch (error) {
     if (error.code !== 'ENOENT') throw error;
-    await fsp.writeFile(resultsFilePath, `${csvHeaders.join(',')}\n`, 'utf8');
+    await fsp.writeFile(resultsFilePath, `${headerLine}\n`, 'utf8');
+    return;
+  }
+
+  // A file from before the newest columns: widen its header in place. Older
+  // rows just end a cell or two short, which reads back as empty values.
+  const [firstLine, ...rest] = content.split('\n');
+  if (firstLine.replace(/\r$/, '') !== headerLine) {
+    await fsp.writeFile(resultsFilePath, [headerLine, ...rest].join('\n'), 'utf8');
   }
 }
 
@@ -85,6 +97,8 @@ function parseCSV(content) {
       email: row.email,
       score: Number(row.score),
       completedAt: row.completedAt,
+      phone: row.phone || '',
+      tag: row.tag || '',
     };
   });
 }
@@ -125,9 +139,11 @@ app.get('/api/results', async (req, res) => {
 app.post('/api/results', async (req, res) => {
   const name = typeof req.body?.name === 'string' ? req.body.name.trim() : '';
   const email = typeof req.body?.email === 'string' ? req.body.email.trim() : '';
+  const phone = typeof req.body?.phone === 'string' ? req.body.phone.trim() : '';
   const score = Number(req.body?.score);
+  const tag = typeof req.body?.tag === 'string' ? req.body.tag.trim() : '';
 
-  // Email is optional: the Talent Challenge flow only asks for a name.
+  // The form needs an email or a phone, not both, so neither is required here.
   if (!name || !Number.isFinite(score)) {
     res.status(400).json({
       message: 'Name and numeric score are required.',
@@ -141,8 +157,10 @@ app.post('/api/results', async (req, res) => {
         entryId: crypto.randomUUID(),
         name,
         email,
+        phone,
         score,
         completedAt: new Date().toISOString(),
+        tag,
       };
 
       await appendResult(result);

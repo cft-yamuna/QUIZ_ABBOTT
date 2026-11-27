@@ -10,8 +10,9 @@ export const quizConfig = {
  * show them. "Your Quiz, Explained" numbers its cards 1-6 against this
  * order, so the questions are deliberately not shuffled.
  *
- * `track` splits the quiz in two halves that drive the talent title:
- * 1, 3 and 5 test employer branding; 2, 4 and 6 test Indeed's hiring products.
+ * `track` splits the quiz in two halves that drive the talent tag:
+ * 1, 3 and 5 are employer branding (EB); 2, 4 and 6 are hiring (H).
+ * Scoring only: the brief says never to show these labels to players.
  */
 export const questions = [
   {
@@ -97,29 +98,69 @@ export function calculateScore(answers) {
   return questions.filter((question) => isAnswerCorrect(question, answers?.[question.id])).length;
 }
 
-/*
- * The Figma file lists eight titles but doesn't say which score earns which.
- * This mapping is our assumption: a perfect score is the Champion, a clean
- * sweep of one half names that strength, and the rest step down by how much
- * of each half was right.
- */
-export function getTalentTitle(answers) {
-  const correct = { brand: 0, hiring: 0 };
-  const total = { brand: 0, hiring: 0 };
+// Points per half: employer branding (EB) and hiring (H), 0-3 each.
+export function getSectionScores(answers) {
+  const scores = { brand: 0, hiring: 0 };
 
   questions.forEach((question) => {
-    total[question.track] += 1;
-    if (isAnswerCorrect(question, answers?.[question.id])) correct[question.track] += 1;
+    if (isAnswerCorrect(question, answers?.[question.id])) scores[question.track] += 1;
   });
 
-  const { brand, hiring } = correct;
+  return scores;
+}
 
-  if (brand === total.brand && hiring === total.hiring) return 'Talent Strategy Champion';
-  if (brand === total.brand) return 'Employer Branding Expert';
-  if (hiring === total.hiring) return 'Hiring Maestro';
-  if (brand >= 2 && hiring >= 2) return 'Talent All-Rounder';
-  if (brand >= 2) return 'Employer Brand Builder';
-  if (hiring >= 2) return 'Hiring Pro';
-  if (brand >= 1 && hiring >= 1) return 'Rising Talent Strategist';
-  return 'Talent Explorer';
+// Tags and next-step lines, word for word from the engagement brief (section 5).
+const TAGS = {
+  champion: {
+    title: 'Talent Strategy Champion',
+    nextStep: "You've mastered both sides. Come see what's next at Indeed.",
+  },
+  brandingExpert: {
+    title: 'Employer Branding Expert',
+    nextStep: 'You know what candidates see. Now see how fast you can hire.',
+  },
+  hiringMaestro: {
+    title: 'Hiring Maestro',
+    nextStep: 'You can fill roles fast. Now make candidates want to join. Visit the Brand Score Wall.',
+  },
+  brandBuilder: {
+    title: 'Employer Brand Builder',
+    nextStep: 'Your brand instincts are strong. See how Indeed turns them into hires.',
+  },
+  hiringPro: {
+    title: 'Hiring Pro',
+    nextStep: 'You know your hiring tools. Discover what your Brand Score says about you.',
+  },
+  allRounder: {
+    title: 'Talent All-Rounder',
+    nextStep: "Balanced across the board. Let's sharpen both sides.",
+  },
+  risingStrategist: {
+    title: 'Rising Talent Strategist',
+    nextStep: 'Great start. Our team can show you where to level up.',
+  },
+  explorer: {
+    title: 'Talent Explorer',
+    nextStep: "Every expert starts somewhere. Let's show you around.",
+  },
+};
+
+/*
+ * The brief's tag table: the total picks the band, and within 5/6 and 4/6
+ * the EB / H split picks the tag. With three questions per half, 5/6 can only
+ * split 3/2 or 2/3, and 4/6 only 3/1, 1/3 or 2/2.
+ */
+export function getTalentTag(answers) {
+  const { brand, hiring } = getSectionScores(answers);
+  const total = brand + hiring;
+
+  if (total === 6) return TAGS.champion;
+  if (total === 5) return brand === 3 ? TAGS.brandingExpert : TAGS.hiringMaestro;
+  if (total === 4) {
+    if (brand === 3) return TAGS.brandBuilder;
+    if (hiring === 3) return TAGS.hiringPro;
+    return TAGS.allRounder;
+  }
+  if (total === 3) return TAGS.risingStrategist;
+  return TAGS.explorer;
 }

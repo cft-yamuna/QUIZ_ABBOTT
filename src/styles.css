@@ -268,14 +268,15 @@ button {
   top: 72px;
 }
 
+/* One line since the email and phone fields came in. */
 .name-screen__title {
+  white-space: nowrap;
   font-family: var(--font-brand);
   font-size: 88px;
   font-weight: 800;
   left: 96px;
   line-height: 1.1;
   top: 262px;
-  width: 1100px;
 }
 
 .name-screen__lede {
@@ -285,7 +286,7 @@ button {
   font-weight: 400;
   left: 100px;
   line-height: 1.1;
-  top: 492px;
+  top: 386px;
   width: 1150px;
 }
 
@@ -303,9 +304,21 @@ button {
   outline: none;
   padding: 0 40px;
   position: absolute;
-  top: 582px;
   user-select: text;
   width: 1080px;
+}
+
+/* Three fields, 112px tall and 20px apart. */
+.name-screen__input--name {
+  top: 473px;
+}
+
+.name-screen__input--email {
+  top: 605px;
+}
+
+.name-screen__input--phone {
+  top: 737px;
 }
 
 .name-screen__input::placeholder {
@@ -317,22 +330,24 @@ button {
   box-shadow: 0 0 0 4px var(--error);
 }
 
+.name-screen__cta {
+  left: 96px;
+  position: absolute;
+  top: 876px;
+}
+
+/* Not in the design. It sits beside Start, centred on it: the 20px gaps
+   between the fields are too tight for a line of text. */
 .name-screen__error {
   white-space: nowrap;
   color: var(--error);
   font-family: var(--font-brand);
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 700;
-  left: 100px;
+  left: 516px;
   line-height: 1.1;
   position: absolute;
-  top: 703px;
-}
-
-.name-screen__cta {
-  left: 96px;
-  position: absolute;
-  top: 738px;
+  top: 908.6px;
 }
 
 /* ---------- 03 — How it works ---------- */

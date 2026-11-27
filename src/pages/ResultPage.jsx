@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import CtaButton from '../components/CtaButton.jsx';
 import Logo from '../components/Logo.jsx';
-import { calculateScore, getTalentTitle, questions } from '../data/questions.js';
+import { calculateScore, getTalentTag, questions } from '../data/questions.js';
 import { useFitText } from '../hooks/useFitText.js';
 import { getCurrentParticipant } from '../utils/storage.js';
 
@@ -11,7 +11,7 @@ export default function ResultPage() {
   const navigate = useNavigate();
   const participant = getCurrentParticipant();
   const titleRef = useRef(null);
-  const talentTitle = participant ? getTalentTitle(participant.answers) : '';
+  const talentTitle = participant ? getTalentTag(participant.answers).title : '';
 
   // Two lines at the design's 70px fill the magenta band; shrink past that.
   useFitText(titleRef, { max: 70, min: 40, maxHeight: 194 }, [talentTitle]);
