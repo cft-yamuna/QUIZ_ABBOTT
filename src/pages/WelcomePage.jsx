@@ -14,7 +14,7 @@ export default function WelcomePage() {
       <Logo className="welcome__logo" />
 
       <h1 className="welcome__title">
-        The 60-Second
+        The 90-Second
         <br />
         Talent Challenge
       </h1>

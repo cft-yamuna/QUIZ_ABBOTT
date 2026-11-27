@@ -1,5 +1,6 @@
 export const quizConfig = {
-  secondsPerQuestion: 10,
+  // 6 questions x 15 s = the 90 seconds in the challenge's name.
+  secondsPerQuestion: 15,
   // "3 Choices Per Question" on How it works is the design's copy. Question 5
   // is true/false and only has two.
   choicesPerQuestion: 3,

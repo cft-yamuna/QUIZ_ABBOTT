@@ -23,7 +23,7 @@ export default defineConfig({
       includeManifestIcons: false,
       manifest: {
         id: '/',
-        name: 'The 60-Second Talent Challenge',
+        name: 'The 90-Second Talent Challenge',
         short_name: 'Talent Challenge',
         description: 'Indeed FutureWorks quiz kiosk.',
         start_url: '/',
